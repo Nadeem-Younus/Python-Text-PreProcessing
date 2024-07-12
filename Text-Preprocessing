@@ -1,0 +1,68 @@
+import string
+from datetime import datetime, timedelta
+from string import punctuation
+from functools import reduce
+import nltk
+from nltk.tokenize import word_tokenize, sent_tokenize, wordpunct_tokenize, punkt
+from nltk.corpus import stopwords
+from nltk import pos_tag
+from string import punctuation
+import pandas as pd
+from nltk.corpus import wordnet
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.cluster import KMeans
+import collections
+from pprint import pprint
+
+textData = pd.read_csv(--filepath, sep='\n', header=None)
+
+textData.columns = ['Body_Text']
+
+textData['Body_Text'] = textData['Body_Text'].astype(str)
+
+# ------------ Text Cleaning ------------ #
+
+import re
+import string
+string.punctuation
+wn = nltk.WordNetLemmatizer()
+ps = nltk.PorterStemmer()
+stopwords = nltk.corpus.stopwords.words("english")
+pd.set_option('display.max_colwidth', 100)
+
+pattern = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+
+path = #file-path
+f = open(path, "r")
+bogusWordList = [pattern.strip() for pattern in f.readlines()]
+
+path = #file-path
+f2 = open(path, "r")
+biasedTokens = [pattern.strip() for pattern in f2.readlines()]
+
+def clean(text):
+    text = "".join([word.lower() for word in text if word not in string.punctuation])
+    pattern1 = pattern.sub('', text)
+    digit = "".join([i for i in pattern1 if not i.isdigit()]) # To remove digits.
+    tokens = re.split('\W+', digit)
+    filter_bogus = [word for word in tokens if word not in bogusWordList]
+    filter_biased = [word for word in filter_bogus if word not in biasedTokens]
+    text = " ".join([wn.lemmatize(word) for word in filter_biased if word not in stopwords])
+    return text
+
+textData['cleaned_text'] = textData['Body_Text'].apply(lambda x: clean(x))
+textData.head(10)
+
+
+# ---------- Sentiment - Polarity ---------- #
+
+from textblob import TextBlob
+
+print('{:40} : {:10} : {:10}'.format("Text", "Polarity", "Subjectivity") )
+
+for review in textData['cleaned_text']:
+    #Find sentiment of a review
+    sentiment = TextBlob(review)
+    #Print individual sentiments
+    print('{:40} :   {: 01.2f}    :   {:01.2f}'.format(review[:40]                , sentiment.polarity, sentiment.subjectivity))
